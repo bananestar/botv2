@@ -1,38 +1,37 @@
-const Discord = require('discord.js');
-const bot = new Discord.Client();
+const Discord = require("discord.js");
+const client = new Discord.Client();
+const fs = require("fs");
+const config = require("./config.json");
 
-var prefix = ("*");
+/*/ Start  /*/
+fs.readdir("./events/", (err, files) => {
+    if (err) return console.error(err);
+    files.forEach(file => {
+      let eventFunction = require(`./events/${file}`);
+      let eventName = file.split(".")[0];
+      client.on(eventName, (...args) => eventFunction.run(client, ...args));
+    });
+  });
+/*/ End  /*/
 
-bot.on('ready', function() {
-    bot.user.setGame("Command: *help");
-    console.log("Connected");
+/*/ Start  commands /*/
+client.on("message", message => {
+  if (message.author.bot) return;
+  if(message.content.indexOf(config.prefix) !== 0) return;
+  const args = message.content.slice(config.prefix.length).trim().split(/ +/g);
+  const command = args.shift().toLowerCase();
+  try {
+    let commandFile = require(`./commands/${command}.js`);
+    commandFile.run(client, message, args);
+  } catch (err) {
+  }
+
+  if (message.content === "Salut"){
+    message.reply("Bonjour Maitre");
+    console.log("Commande Salut effectué");
+}
 });
+/*/ End  commands /*/
 
-bot.login(process.env.TOKEN);
-
-bot.on('message', message => {
-    if (message.content === prefix + "help"){
-        message.channel.sendMessage("Liste des commandes: \n -*help");
-    }
-
-    if (message.content === "Salut"){
-        message.reply("Bonjour Maitre");
-        console.log("Commande Salut effectué");
-    }
-
-    if (message.content.startsWith(prefix + "sondage")){
-        let args = message.content.split(" ").slice(1);
-        let thingToEcho = args.join(" ")
-        var embed = new Discord.RichEmbed()
-            .setDescription("Sondage")
-            .addField(thingToEcho, "Répondre avec :white_check_mark: ou :x:")
-            .setColor("0xB40404")
-            .setTimestamp()
-        message.channel.sendEmbed(embed)
-            .then(function (message){
-                message.react("✅")
-                message.react("❌")
-            }).catch(function(){
-            })
-            
-        }};
+/*/* Login as the bot. /*/
+client.login(config.token);
