@@ -5,7 +5,7 @@ exports.run = (client, message, args, level) => {
   let question = args.slice(0).join(" ");
 
   if (args.length === 0)
-  return message.reply('**Invalid :** `!sondage <Question>`')
+  return message.reply('**Invalid:** `*Poll <Question>`')
 
   const embed = new Discord.RichEmbed()
   .setTitle("Sondage")
@@ -22,3 +22,5 @@ exports.run = (client, message, args, level) => {
   .catch(() => console.error('Emoji failed to react.'));
 
 }
+
+ 
